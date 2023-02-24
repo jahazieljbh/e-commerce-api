@@ -1,7 +1,6 @@
-
+import app from "./app.js";
 import { PORT } from "./config/config.js";
 import { connectDatabase } from "./config/database.js";
-
 
 async function startServer() {
   try {
