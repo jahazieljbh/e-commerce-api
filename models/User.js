@@ -3,17 +3,27 @@ import validator from "validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+import {JWT_SECRET} from "../config/config.js"
+
 const userSchema = new mongoose.Schema(
   {
     firstname: {
       type: String,
       required: [true, "El nombre es obligatorio"],
-      trim: true,
+      trim: true
     },
     lastname: {
       type: String,
       required: [true, "El apellido es obligatorio"],
-      trim: true,
+      trim: true
+    },
+    mobile: {
+      type: String,
+      validate: {
+        validator: (value) => validator.isMobilePhone(value, "es-MX"),
+        message: (props) =>
+          `${props.value} no es un número de teléfono válido en México`
+      }
     },
     email: {
       type: String,
@@ -22,48 +32,108 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       validate: {
-        validator: function (value) {
-          return validator.isEmail(value);
-        },
-        message: (props) => `${props.value} no es un correo electrónico válido`,
-      },
-    },
-    mobile: {
-      type: String,
-      trim: true,
-      validate: {
-        validator: function (value) {
-          return validator.isMobilePhone(value, "es-MX");
-        },
-        message: (props) =>
-          `${props.value} no es un número de teléfono válido en México`,
-      },
+        validator: validator.isEmail,
+        message: (props) => `${props.value} no es un correo electrónico válido`
+      }
     },
     password: {
       type: String,
       required: [true, "La contraseña es obligatoria"],
       trim: true,
-      minlength: [8, "La contraseña debe tener al menos 8 caracteres"],
+      minlength: [8, "La contraseña debe tener al menos 8 caracteres"]
     },
     role: {
       type: String,
       enum: ["user", "admin"],
-      default: "user",
+      default: "user"
     },
     avatar: {
-      type: Buffer,
-    },
+      type: String,
+      validate: {
+        validator: function (value) {
+          if (!value) {
+            return true; // Permitir una cadena vacía o nula
+          }
+    
+          const allowedExtensions = ["jpg", "jpeg", "png", "gif"];
+          const fileExtension = value.split(".").pop().toLowerCase();
+    
+          return allowedExtensions.includes(fileExtension);
+        },
+        message: (props) =>
+          `${props.value} no es un formato de archivo de imagen válido. Los formatos permitidos son: jpg, jpeg, png y gif.`
+      }
+    },    
     tokens: [
       {
         token: {
           type: String,
-          required: true,
-        },
-      },
+          required: true
+        }
+      }
     ],
+    cart: [
+      {
+        product: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "Product",
+          required: true
+        },
+        quantity: {
+          type: Number,
+          required: true,
+          min: [1, "La cantidad debe ser mayor o igual a 1"]
+        }
+      }
+    ],
+    addresses: [
+      {
+        addressName: {
+          type: String,
+          required: [true, "El nombre de la dirección es obligatorio"],
+          trim: true
+        },
+        addressLine1: {
+          type: String,
+          required: [true, "La dirección es obligatoria"],
+          trim: true
+        },
+        addressLine2: {
+          type: String,
+          trim: true
+        },
+        city: {
+          type: String,
+          required: [true, "La ciudad es obligatoria"],
+          trim: true
+        },
+        state: {
+          type: String,
+          required: [true, "El estado es obligatorio"],
+          trim: true
+        },
+        country: {
+          type: String,
+          required: [true, "El país es obligatorio"],
+          trim: true
+        },
+        zipcode: {
+          type: String,
+          required: [true, "El código postal es obligatorio"],
+          trim: true
+        }
+      }
+    ],
+    favoriteProducts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Product",
+        required: true
+      }
+    ]
   },
   {
-    timestamps: true,
+    timestamps: true
   }
 );
 
@@ -83,7 +153,7 @@ userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign(
     { _id: user._id.toString() },
-    process.env.JWT_SECRET || "default_secret_key"
+    JWT_SECRET
   );
 
   user.tokens = user.tokens.concat({ token });
@@ -107,6 +177,20 @@ userSchema.statics.findByCredentials = async (email, password) => {
   }
 
   return user;
+};
+
+// Método para restablecer el password con expiración de 30 minutos
+userSchema.methods.generatePasswordReset = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  this.passwordResetExpiration = Date.now() + 30 * 60 * 1000;
+
+  return resetToken;
 };
 
 // Middleware para encriptar la contraseña antes de guardarla en la base de datos

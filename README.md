@@ -3,16 +3,24 @@ Ejemplo crear usuaio Post a localhost:3000/api/users
 {
 "firstname": "John",
 "lastname": "Doe",
-"email": "johndoe@example.com",
 "mobile": "2711338357",
+"email": "johndoe@example.com",
 "password": "MyPassword123",
 "role": "user",
-"avatar": "binary data",
+"avatar": "/uploads/image.jpg",
 "tokens": [
 {
 "token": "mytoken123"
 }
 ]
+}
+
+{
+"firstname": "John",
+"lastname": "Doe",
+"mobile": "2711338357",
+"email": "johndoe@example.com",
+"password": "MyPassword123"
 }
 
 Ejemplo login post localhost:3000/api/users/login agregar Http Headers Content-Type y como valor application/json

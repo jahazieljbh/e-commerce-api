@@ -5,11 +5,11 @@ import bcrypt from "bcrypt";
 import passport from "passport";
 import path from "path";
 import fs from "fs/promises";
-import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
+import { dirname, extname, join } from "path";
+import { fileURLToPath } from "url";
 
-// Definir la clave secreta para el token
-const secret = "clave_secreta_para_token";
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Controlador para crear un nuevo usuario
 export const createUser = async (req, res) => {
@@ -28,6 +28,7 @@ export const createUser = async (req, res) => {
 
     // Validar la fortaleza de la contraseña
     const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+
     if (!passwordRegex.test(req.body.password)) {
       return res.status(400).send({
         error:
@@ -37,6 +38,7 @@ export const createUser = async (req, res) => {
 
     // Verificar si el correo electrónico ya existe en la base de datos antes de crear un nuevo usuario
     const existingUser = await User.findOne({ email: req.body.email });
+
     if (existingUser) {
       return res.status(400).send({
         error: "Ya existe un usuario registrado con ese correo electrónico.",
@@ -45,8 +47,7 @@ export const createUser = async (req, res) => {
 
     const user = new User(req.body);
     await user.save();
-    const token = jwt.sign({ _id: user._id }, secret);
-    res.status(201).send({ user, token });
+    res.status(201).send({ user });
   } catch (error) {
     res.status(400).send(error.message);
   }
@@ -126,6 +127,17 @@ export const getUserById = async (req, res) => {
   }
 };
 
+// Controlador para obtener información de todos los usuarios
+export const getUsers = async (req, res) => {
+  try {
+    const users = await User.find({}); // excluye los campos password y tokens
+
+    res.status(200).send(users);
+  } catch (error) {
+    res.status(500).send(error.message);
+  }
+};
+
 // Controlador para actualizar la información de un usuario por ID
 export const updateUserById = async (req, res) => {
   try {
@@ -199,21 +211,29 @@ export const deleteUserById = async (req, res) => {
 export const uploadAvatar = async (req, res) => {
   try {
     const user = req.user;
-    const avatarPath = path.join("public", "avatars", `${user._id}.jpg`);
-    const buffer = req.file.buffer;
+    if (!req.file) {
+      return res.status(400).send('No se ha enviado ningún archivo');
+    }
+    const avatarPath = path.join(
+      __dirname,
+      "..",
+      "public",
+      "uploads",
+      `${user._id}.jpg`
+    );
 
     // Guardar el archivo en el sistema de archivos
-    await fs.writeFile(avatarPath, buffer);
+    await fs.writeFile(avatarPath, req.file.buffer);
 
-    // Actualizar la referencia del avatar en el usuario
-    user.avatar = avatarPath;
+    // Actualizar la referencia del avatar en el usuario y guardarlo en la base de datos 
+    user.avatar = `/uploads/${user._id}.jpg`; 
     await user.save();
 
-    res.status(200).send();
+    res.status(200).send({ message: 'Avatar subido exitosamente' });
   } catch (error) {
     console.error(error);
     res.status(500).send("Error al subir el avatar");
-  }
+  }  
 };
 
 // Controlador para obtener el avatar de un usuario
@@ -223,12 +243,10 @@ export const getAvatarById = async (req, res) => {
     if (!user || !user.avatar) {
       throw new Error("Recurso no encontrado");
     }
-    const imagePath = path.join(__dirname, `../uploads/${user._id}/avatar.jpg`);
+    const imagePath = path.join(__dirname, `../public/uploads/${user._id}.jpg`); // Se agrega el _id del usuario para que el nombre de la imagen sea único
     await fs.writeFile(imagePath, user.avatar);
     res.set("Content-Type", "image/jpg");
-    res.sendFile(imagePath, () => {
-      fs.unlink(imagePath); // Eliminar el archivo después de que se envíe la respuesta
-    });
+    res.sendFile(imagePath); // Se agrega esta línea para enviar la imagen al cliente 
   } catch (error) {
     res.status(404).send({ error: error.message });
   }
