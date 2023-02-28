@@ -3,6 +3,10 @@ import validator from "validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
+// usar para impementar 2FA
+//import speakeasy from "speakeasy";
+//import qrcode from "qrcode";
+
 import {JWT_SECRET} from "../config/config.js"
 
 const userSchema = new mongoose.Schema(
@@ -44,8 +48,8 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["user", "admin"],
-      default: "user"
+      enum: ['user', 'admin'],
+      default: 'user'
     },
     avatar: {
       type: String,
@@ -72,6 +76,10 @@ const userSchema = new mongoose.Schema(
         }
       }
     ],
+    isBlocked: {
+      type: Boolean,
+      default: false
+    },
     cart: [
       {
         product: {
@@ -130,7 +138,7 @@ const userSchema = new mongoose.Schema(
         ref: "Product",
         required: true
       }
-    ]
+    ],
   },
   {
     timestamps: true
@@ -153,7 +161,8 @@ userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign(
     { _id: user._id.toString() },
-    JWT_SECRET
+    JWT_SECRET, 
+    { expiresIn: '1h'}
   );
 
   user.tokens = user.tokens.concat({ token });
@@ -198,7 +207,7 @@ userSchema.pre("save", async function (next) {
   const user = this;
 
   if (user.isModified("password")) {
-    user.password = await bcrypt.hash(user.password, 8);
+    user.password = await bcrypt.hash(user.password, 10);
   }
 
   next();
