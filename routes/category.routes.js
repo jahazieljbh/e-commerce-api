@@ -13,7 +13,7 @@ import { auth, isAdmin } from "../utils/auth.js";
 const router = Router();
 
 // Ruta para crear un nueva categoria
-router.post("/", createCategory);
+router.post("/", auth, isAdmin, createCategory);
 
 // Ruta para obtener información de una categoria
 router.get("/:id", getCategoryById);

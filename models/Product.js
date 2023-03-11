@@ -8,6 +8,12 @@ const productSchema = new mongoose.Schema(
       required: [true, "El nombre es obligatorio"],
       trim: true,
     },
+    slug: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+    },
     description: {
       type: String,
       required: [true, "La descripción es obligatoria"],
@@ -19,22 +25,22 @@ const productSchema = new mongoose.Schema(
       min: [0, "El precio no puede ser negativo"],
     },
     images: {
-      type: Array,
+      type: [String],
       validate: {
-        validator: (value) => value.every((image) => validator.isURL(image)),
-        message: (props) => `${props.value} no es una URL válida`,
+        validator: (value) => value.length <= 5,
+        message: "El número máximo de imágenes es 5",
       },
     },
     colors: {
-      type: Array,
+      type: [String]
     },
     tags: { 
-      type: Array,
+      type: [String]
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
-      require: true,
+      required: [true, "La categoria es obligatoria"],
     },
     brand: {
       type: String,

@@ -14,8 +14,12 @@ export const auth = async (req, res, next) => {
       "tokens.token": token,
     });
 
+    if(!token){
+      return res.status(401).json("Token no autorizado o caducado, vuelva a iniciar sesión");
+    }
+
     if (!user || user.isBlocked) {
-      return res.status(401).json({ error: "Usuario no autorizado" });
+      return res.status(401).json({ error: "No autorizado para acceder a este recurso" });
     }
 
     req.token = token;
@@ -32,6 +36,6 @@ export const isAdmin = async (req, res, next) => {
   if (req.user.role === "admin") {
     next();
   } else {
-    res.status(401).json({ message: "Acceso no autorizado" });
+    res.status(403).json({ message: "No autorizado para acceder a este recurso" });
   }
 };

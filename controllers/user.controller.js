@@ -1,25 +1,44 @@
 import mongoose from "mongoose";
 import validator from "validator";
-import { body, validationResult } from "express-validator";
 import path from "path";
 import fs from "fs/promises";
 import { dirname, extname, join } from "path";
 import { fileURLToPath } from "url";
 
 import User from "../models/User.js";
+import Address from "../models/Address.js";
+import Cart from "../models/Cart.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // Controlador para crear un nuevo usuario
 export const createUser = async (req, res) => {
-  const errors = validationResult(req);
-
-  if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
-  }
-
   try {
-    const { email, password } = req.body;
+    const { firstname, lastname, mobile, email, password, role, avatar } = req.body;
+
+    if (!firstname) {
+      return res
+        .status(400)
+        .json({ message: "El nombre es obligatorio" });
+    }
+
+    if (!lastname) {
+      return res
+        .status(400)
+        .json({ message: "El apellido es obligatorio" });
+    }
+
+    if (!validator.isMobilePhone(mobile, "es-MX")) {
+      return res
+        .status(400)
+        .json({ message: `${mobile} no es un número de teléfono válido en México` });
+    }
+
+    if (!email) {
+      return res
+        .status(400)
+        .json({ message: "El email es obligatorio" });
+    }
 
     if (!validator.isEmail(email)) {
       return res
@@ -27,249 +46,353 @@ export const createUser = async (req, res) => {
         .json({ error: "Por favor ingrese un correo electrónico válido." });
     }
 
+    if (!password) {
+      return res
+        .status(400)
+        .json({ message: "La contraseña es obligatoria" });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({
+        message: "La contraseña debe tener al menos 8 caracteres"
+      });
+    }
+
     const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
 
     if (!validator.matches(password, passwordRegex)) {
       return res.status(400).json({
-        error:
+        message:
           "Por favor ingrese una contraseña con al menos 8 caracteres que contenga al menos un número, una letra mayúscula y una letra minúscula.",
       });
+    }
+
+    if (avatar) {
+      const allowedExtensions = ["jpg", "jpeg", "png", "gif"];
+      const fileExtension = avatar.split(".").pop().toLowerCase();
+    
+      if (!allowedExtensions.includes(fileExtension)) {
+        return res.status(400).json({
+          message: `${avatar} no es un formato de archivo de imagen válido. Los formatos permitidos son: jpg, jpeg, png y gif.`});
+      }
     }
 
     const existingUser = await User.findOne({ email });
 
     if (existingUser) {
-      return res.status(400).json({
-        error: "Ya existe un usuario registrado con ese correo electrónico.",
+      return res.status(409).json({
+        message: "Ya existe un usuario registrado con ese correo electrónico.",
       });
     }
 
-    const userData = { ...req.body };
+    const userData = { 
+      firstname, 
+      lastname, 
+      mobile, 
+      email, 
+      password,
+      role,
+      avatar
+    };
 
     const user = await User.create(userData);
 
-    return res.status(201).json({ user });
+    return res.status(201).json({ success: true, message: "Usuario creado exitosamente", user: user });
   } catch (err) {
-    return res.status(500).json({ error: "Hubo un error al crear el usuario" });
+    console.error(err);
+    return res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Controlador para autenticar a un usuario
 export const loginUser = async (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({
-      error: "Se requiere un correo electrónico y una contraseña válidos",
-    });
-  }
-
-  if (!validator.isEmail(email)) {
-    return res
-      .status(400)
-      .json({ error: "El correo electrónico debe ser válido" });
-  }
-
-  if (password.length < 8) {
-    return res
-      .status(400)
-      .json({ error: "La contraseña debe tener al menos 8 caracteres" });
-  }
-
   try {
-    const user = await User.findByCredentials(email, password);
+    const { email, password } = req.body;
 
-    if (!user) {
-      return res.status(401).json({
-        error: "No se pudo encontrar un usuario con estas credenciales",
+    if (!email) {
+      return res
+        .status(400)
+        .json({ message: "El email es obligatorio" });
+    }
+
+    if (!validator.isEmail(email)) {
+      return res
+        .status(400)
+        .json({ error: "Por favor ingrese un correo electrónico válido." });
+    }
+
+    if (!password) {
+      return res
+        .status(400)
+        .json({ message: "La contraseña es obligatoria" });
+    }
+
+    if (password.length < 8) {
+      return res
+        .status(400)
+        .json({ error: "La contraseña debe tener al menos 8 caracteres" });
+    }
+
+    const passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+
+    if (!validator.matches(password, passwordRegex)) {
+      return res.status(400).json({
+        message:
+          "Por favor ingrese una contraseña con al menos 8 caracteres que contenga al menos un número, una letra mayúscula y una letra minúscula.",
       });
     }
 
+    const user = await User.findByCredentials(email, password);
+
     const token = await user.generateAuthToken();
 
-    return res.status(200).json({ user, token });
+    return res.status(200).json({ success: true, message: "Inicio de sesion correcto", user: user, token: token });
   } catch (err) {
     console.error(err);
-
-    return res.status(500).json({ error: "Hubo un error al iniciar sesión" });
+    return res.status(500).json({ success: false, error: err.message });
   }
 };
 
 // Controlador para cerrar sesión de un usuario
 export const logoutUser = async (req, res) => {
   try {
-    req.user.tokens = req.user.tokens.filter(
+    const tokens = req.user.tokens;
+    const user = req.user;
+    // Eliminar el token actual de la lista de tokens del usuario
+    tokens = tokens.filter(
       (token) => token.token !== req.token
     );
 
-    await req.user.save();
+    await user.save();
 
-    return res.status(200).json({ message: "Sesión cerrada correctamente" });
+    return res.status(200).json({ success: true, message: "Sesión cerrada correctamente" });
   } catch (err) {
     console.error(err);
-
-    return res.status(500).json({ error: "Error interno del servidor" });
+    return res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Controlador para cerrar sesión de todos los dispositivos del usuario
 export const logoutAllUsers = async (req, res) => {
   try {
-    req.user.tokens = [];
+    const tokens = req.user.tokens;
+    const user = req.user;
+    tokens = [];
 
-    await req.user.save();
+    await user.save();
 
-    return res.status(200).json({ message: "Sesiones cerradas correctamente" });
+    return res.status(200).json({ success: true, message: "Sesiones cerradas correctamente" });
   } catch (err) {
     console.error(err);
-
-    return res.status(500).json({ error: "Error interno del servidor" });
+    return res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Controlador para obtener información de un usuario
 export const getUserById = async (req, res) => {
+  const userId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "id no válido" });
+  }
+
+  if (!req.params || !userId) {
+    return res.status(400).json({ message: "Parámetros no válidos" });
+  }
+
   try {
-    const _id = mongoose.Types.ObjectId(req.params.id);
-    const user = await User.findById(_id);
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: "El usuario no existe" });
     }
 
-    return res.status(200).json({ user });
+    return res.status(200).json({ success: true, user: user });
   } catch (err) {
-    if (err instanceof mongoose.CastError) {
-      return res.status(400).json({ message: "ID de usuario inválido" });
-    }
-
     console.error(err);
-
-    return res.status(500).json({ message: "Error interno del servidor" });
+    return res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Controlador para obtener información de todos los usuarios
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().sort("-_id");
+    const users = await User.find();
 
-    if (!users.length) {
+    if (!users || users.length === 0) {
       return res.status(404).json({ message: "No hay usuarios disponibles" });
     }
 
-    return res.status(200).json({ users });
+    return res.status(200).json({ success: true, count: users.length, users: users });
   } catch (err) {
     console.error(err);
-
-    return res
-      .status(500)
-      .json({ error: "Ha ocurrido un error al obtener los usuarios" });
+    return res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Controlador para actualizar la información de un usuario por ID
 export const updateUserById = async (req, res) => {
+  const userId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "id no válido" });
+  }
+
+  if (!req.params || !userId) {
+    return res.status(400).json({ message: "Parámetros no válidos" });
+  }
+
   try {
-    const allowedUpdates = ["firstname", "lastname", "email", "mobile"];
+    const allowedUpdates = [
+      "firstname",
+      "lastname",
+      "mobile"
+    ];
+
+    if (!Object.keys(req.body).length) {
+      return res
+        .status(400)
+        .json({ error: "No se recibieron datos para actualizar." });
+    }
+
     const updates = Object.keys(req.body);
+
     const isValidOperation = updates.every((update) =>
       allowedUpdates.includes(update)
     );
 
     if (!isValidOperation) {
       return res
-        .status(400)
+        .status(403)
         .json({ error: "Actualización no válida: campos no permitidos." });
     }
 
-    const user = await User.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true,
-    });
+    const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ error: "El usuario no existe." });
     }
 
-    return res.status(200).json({ user });
+    const userData = { ...req.body };
+
+    const updateUser = await user.updateOne(userData);
+
+    return res.status(200).json({ success: true, message: "Usuario actualizado exitosamente", user: updateUser });
   } catch (err) {
     console.error(err);
-    return res
-      .status(500)
-      .json({ error: "Ha ocurrido un error al actualizar el usuario" });
+    return res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Controlador para eliminar un usuario por ID
 export const deleteUserById = async (req, res) => {
+  const userId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "id no válido" });
+  }
+
+  if (!req.params || !userId) {
+    return res.status(400).json({ message: "Parámetros no válidos" });
+  }
+
   try {
-    if (!mongoose.Types.ObjectId.isValid(req.params.id)) {
-      return res.status(400).json({ error: "ID no válido." });
+    const userExists = await User.findById(userId);
+
+    if (!userExists) {
+      return res.status(404).json({ error: "Usuario no encontrado" });
     }
 
-    const user = await User.findById(req.params.id);
+    await Address.deleteMany({ user: userId });
 
-    await user.deleteOne();
-    return res.status(200).json({ user });
+    await Cart.deleteMany({ user: userId });
+
+    await userExists.deleteOne({ _id: userId})
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Usuario eliminado exitosamente" });
   } catch (err) {
     console.error(err);
-    return res
-      .status(500)
-      .json({ error: "Ha ocurrido un error al eliminar el usuario" });
+    return res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Controlador para subir el avatar de un usuario
 export const uploadAvatar = async (req, res) => {
   try {
-    const user = req.user;
-    if (!req.file) {
-      return res.status(400).json("No se ha enviado ningún archivo");
+    const user = req.user._id;
+    const avatarFile = req.file;
+
+    if (!avatarFile) {
+      return res.status(400).json({ message: "No se ha enviado ningún archivo"});
     }
+
+    const allowedExtensions = ["jpg", "jpeg", "png", "gif"];
+    const fileExtension = avatarFile.name.split(".").pop().toLowerCase();
+
+    if (!allowedExtensions.includes(fileExtension)) {
+      return res.status(400).json({ message: `${avatarFile} no es un formato de archivo de imagen válido. Los formatos permitidos son: jpg, jpeg, png y gif.` });
+    }
+
     const avatarPath = path.join(
       __dirname,
       "..",
       "public",
       "uploads",
-      `${user._id}.jpg`
+      `${user}.${fileExtension}`
     );
 
-    // Guardar el archivo en el sistema de archivos
-    await fs.writeFile(avatarPath, req.file.buffer);
+    await fs.writeFile(avatarPath, avatarFile);
 
-    // Actualizar la referencia del avatar en el usuario y guardarlo en la base de datos
-    user.avatar = `/uploads/${user._id}.jpg`;
-    await user.save();
+    const userData = {
+      avatar: avatarPath
+    }
+    
+    const uploadAvatar = await User.findByIdAndUpdate(user, userData);
 
-    res.status(200).json({ message: "Avatar subido exitosamente" });
+    return res.status(200).json({ success: true, message: "Imagen de perfil subido exitosamente", user: uploadAvatar });
   } catch (err) {
     console.error(err);
-    res.status(500).json("Error al subir el avatar");
+    return res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Controlador para obtener el avatar de un usuario
 export const getAvatarById = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const userId = req.params.id;
+
+    const user = await User.findById(userId);
     if (!user || !user.avatar) {
-      throw new Error("Recurso no encontrado");
+      return res.status(404).json({ message: "Recurso no encontrado" });
     }
+
     const imagePath = path.join(__dirname, `../public/uploads/${user._id}.jpg`);
     await fs.writeFile(imagePath, user.avatar);
     res.set("Content-Type", "image/jpg");
     res.sendFile(imagePath);
+
+    return res.status(200).json({ success: true, imagen: imagePath });
   } catch (err) {
     console.error(err);
-    res.status(404).json({ error: error.message });
+    res.status(404).json({ message: "Error interno del servidor" });
   }
 };
 
 // Esta función bloquea un usuario a partir de su ID
 export const blockUserById = async (req, res) => {
+  const userId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "id no válido" });
+  }
+
+  if (!req.params || !userId) {
+    return res.status(400).json({ message: "Parámetros no válidos" });
+  }
+
   try {
-    const userId = req.params.id;
     const user = await User.findById(userId);
 
     if (!user) {
@@ -280,38 +403,47 @@ export const blockUserById = async (req, res) => {
       return res.status(400).json({ message: "El usuario ya está bloqueado" });
     }
 
-    if (user._id === req.user._id && req.user.role === 'admin') { 
-      return res.status(403).json({ message: 'No puedes bloquear tu propia cuenta' }); 
+    if (user._id === req.user._id && req.user.role === "admin") {
+      return res
+        .status(403)
+        .json({ message: "No puedes bloquear tu propia cuenta" });
     }
 
-    await User.updateOne({ _id: userId }, { isBlocked: true });
+    await user.updateOne({ _id: userId }, { isBlocked: true });
 
     return res
       .status(200)
-      .json({ status: "success", message: "Usuario bloqueado con éxito" });
+      .json({ success: true, message: "Usuario bloqueado con exitosamente" });
   } catch (err) {
     console.error(err);
-    return res
-      .status(500)
-      .json({ status: "error", message: "Error Interno del Servidor" });
+    return res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Esta función desbloquea un usuario a partir de su ID
 export const unblockUserById = async (req, res) => {
+  const userId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(userId)) {
+    return res.status(400).json({ message: "id no válido" });
+  }
+
+  if (!req.params || !userId) {
+    return res.status(400).json({ message: "Parámetros no válidos" });
+  }
+
   try {
-    const userId = req.params.id;
     const user = await User.findById(userId);
 
     if (!user) {
       return res.status(404).json({ message: "Usuario no encontrado" });
     }
 
-    await User.updateOne({ _id: userId }, { $set: { isBlocked: false } });
+    await user.updateOne({ _id: userId }, { $set: { isBlocked: false } });
 
-    return res.status(200).json({ message: "Usuario desbloqueado con éxito" });
+    return res.status(200).json({ success: true, message: "Usuario desbloqueado con exitosamente" });
   } catch (err) {
     console.error(err);
-    return res.status(400).json({ error: error.message });
+    return res.status(500).json({ success: false, error: "Error interno del servidor" });
   }
 };

@@ -44,7 +44,13 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, "La contraseña es obligatoria"],
       trim: true,
-      minlength: [8, "La contraseña debe tener al menos 8 caracteres"]
+      minlength: [8, "La contraseña debe tener al menos 8 caracteres"],
+      validate: {
+        validator(v) {
+          return /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}$/.test(v);
+        },
+        message: props => `${props.value} no es una contraseña válida. Debe contener al menos un número, una letra mayúscula y una letra minúscula.` 
+      }
     },
     role: {
       type: String,
@@ -58,16 +64,16 @@ const userSchema = new mongoose.Schema(
           if (!value) {
             return true; // Permitir una cadena vacía o nula
           }
-    
+
           const allowedExtensions = ["jpg", "jpeg", "png", "gif"];
           const fileExtension = value.split(".").pop().toLowerCase();
-    
+
           return allowedExtensions.includes(fileExtension);
         },
         message: (props) =>
           `${props.value} no es un formato de archivo de imagen válido. Los formatos permitidos son: jpg, jpeg, png y gif.`
       }
-    },    
+    },
     tokens: [
       {
         token: {
@@ -80,65 +86,14 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
-    cart: [
-      {
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product",
-          required: true
-        },
-        quantity: {
-          type: Number,
-          required: true,
-          min: [1, "La cantidad debe ser mayor o igual a 1"]
-        }
-      }
-    ],
-    addresses: [
-      {
-        addressName: {
-          type: String,
-          required: [true, "El nombre de la dirección es obligatorio"],
-          trim: true
-        },
-        addressLine1: {
-          type: String,
-          required: [true, "La dirección es obligatoria"],
-          trim: true
-        },
-        addressLine2: {
-          type: String,
-          trim: true
-        },
-        city: {
-          type: String,
-          required: [true, "La ciudad es obligatoria"],
-          trim: true
-        },
-        state: {
-          type: String,
-          required: [true, "El estado es obligatorio"],
-          trim: true
-        },
-        country: {
-          type: String,
-          required: [true, "El país es obligatorio"],
-          trim: true
-        },
-        zipcode: {
-          type: String,
-          required: [true, "El código postal es obligatorio"],
-          trim: true
-        }
-      }
-    ],
-    favoriteProducts: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Product",
-        required: true
-      }
-    ],
+    cart:[{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Cart",
+    }],
+    addresses: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Address'
+    }],
   },
   {
     timestamps: true
@@ -160,13 +115,16 @@ userSchema.methods.toJSON = function () {
 userSchema.methods.generateAuthToken = async function () {
   const user = this;
   const token = jwt.sign(
-    { _id: user._id.toString() },
-    JWT_SECRET, 
-    { expiresIn: '1h'}
+    { _id: user._id.toString() }, 
+    JWT_SECRET,
   );
 
-  user.tokens = user.tokens.concat({ token });
-  await user.save();
+  try {
+    user.tokens = user.tokens.concat({ token });
+    await user.save();
+  } catch (err) {
+    console.error(err);
+  }
 
   return token;
 };

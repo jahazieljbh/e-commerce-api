@@ -1,113 +1,195 @@
+import mongoose from "mongoose";
 import Category from "../models/Category.js";
+import Product from "../models/Product.js";
 
 // Crear una nueva categoría
 export const createCategory = async (req, res) => {
-  try {
-    const existingCategory = await Category.findOne({ name: req.body.name });
+  const { name } = req.body;
 
-    if (existingCategory) {
-      return res.status(400).json({
+  if (!name) {
+    return res.status(400).json({
+      message: "El nombre de la categoría es obligatorio",
+    });
+  }
+
+  try {
+    const categoryExists = await Category.findOne({ name: name });
+
+    if (categoryExists) {
+      return res.status(409).json({
         message: "La categoría ya existe",
       });
     }
 
-    const category = await Category.create(req.body);
+    const categoryData = {
+      name
+    }
+
+    const category = await Category.create(categoryData);
 
     return res.status(201).json({
       success: true,
       message: "Categoría creada exitosamente",
-      data: category,
+      category: category,
     });
   } catch (err) {
-    if (err.name === "ValidationError") {
-      const messages = Object.values(err.errors).map((val) => val.message);
-      return res.status(400).json({ success: false, error: messages });
-    } else {
-      return res.status(500).json({ success: false, error: "Server Error" });
-    }
+    console.error(err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Eliminar una categoría por ID
 export const deleteCategoryById = async (req, res) => {
-  try {
-    const category = await Category.findById(req.params.id);
+  const categoryId = req.params.id;
 
-    if (!category) {
+  if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+    return res.status(400).json({ message: "id no válido" });
+  }
+
+  if (!req.params || !categoryId) {
+    return res.status(400).json({ message: "Parámetros no válidos" });
+  }
+
+  try {
+    const categoryExists = await Category.findById(categoryId);
+
+    if (!categoryExists) {
       return res.status(404).json({ message: "Categoría no encontrada" });
     }
 
-    await Category.findByIdAndDelete(req.params.id);
+    // Verificar si hay productos asociados a la categoría antes de eliminarla
+    const products = await Product.find({ category: categoryId });
 
-    return res.status(200).json({ success: true, data: {} });
+    if (products && products.length > 0) {
+      return res.status(409).json({
+        message:
+          "No se puede eliminar la categoría porque hay productos asociados",
+      });
+    }
+
+    await categoryExists.deleteOne({ _id: categoryId });
+
+    return res
+      .status(200)
+      .json({ success: true, message: "Categoria eliminada exitosamente" });
   } catch (err) {
-    console.log("error ", err);
-    return res.status(500).json({ success: false, error: "Server Error" });
+    console.error(err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Actualizar una categoría por ID
 export const updateCategoryById = async (req, res) => {
+  const categoryId = req.params.id;
+
+  if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+    return res.status(400).json({ message: "id no válido" });
+  }
+
+  if (!req.params || !categoryId) {
+    return res.status(400).json({ message: "Parámetros no válidos" });
+  }
+
+  const { name } = req.body;
+
+  if (!name) {
+    return res.status(400).json({
+      message: "El nombre de la categoría es obligatorio",
+    });
+  }
+
   try {
-    //Verificar que el nombre de la categoría no exista en la base de datos
-    const categoryNameExists = await Category.findOne({ name: req.body.name });
-
-    if (categoryNameExists) {
-      return res
-        .status(400)
-        .json({ error: "El nombre de la categoría ya existe" });
-    }
-
-    //Buscar la categoría a actualizar por su id
-    const category = await Category.findById(req.params.id);
+    const categoryExists = await Category.findById(categoryId);
 
     //Verificar que la categoría exista
-    if (!category) {
-      return res.status(404).json({ error: "La categoría no existe" });
+    if (!categoryExists) {
+      return res.status(404).json({ message: "La categoría no existe" });
     }
 
-    //Actualizar los campos de la categoría
-    category.name = req.body.name;
+    //Verificar si la categoría tiene productos asociados
+    const productsAssociated = await Product.find({ category: categoryId });
 
-    //Guardar los cambios en la base de datos
-    await category.save();
+    if (productsAssociated && productsAssociated.length > 0) {
+      //Si hay productos asociados a esta categoria, entonces no se puede actualizar
+      return res
+        .status(409)
+        .json({
+          message:
+            "No se puede actualizar esta categoría porque hay productos asociados",
+        });
+    }
+
+    const categoryData = {
+      name
+    }
+
+    const updateCategory = await Category.updateOne(categoryData);
 
     return res
       .status(200)
-      .json({ message: "Categoría actualizada exitosamente" });
-  } catch (error) {
-    //Manejar errores en caso de que ocurran
-    console.error(error);
-    return res.status(500).json({ error: "Error al actualizar la categoría" });
+      .json({ success: true, message: "Categoria actualizada exitosamente", category: updateCategory });
+  } catch (err) {
+    console.error(err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Obtener categorías
 export const getAllCategories = async (req, res) => {
   try {
-    const categories = await Category.find().sort("-_id");
+    const categories = await Category.find();
 
-    res.status(200).json({
+    if (!categories) {
+      return res
+        .status(404)
+        .json({ message: "No hay categorias" });
+    }
+
+    return res.status(200).json({
       success: true,
       count: categories.length,
-      data: categories,
+      categories: categories,
     });
   } catch (err) {
-    res.status(500).json({ success: false, error: err });
+    console.error(err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Error interno del servidor" });
   }
 };
 
 // Obtener una categoría por ID
 export const getCategoryById = async (req, res) => {
-  try {
-    const category = await Category.findById(req.params.id);
+  const categoryId = req.params.id;
 
-    if (!category) {
-      return res.status(404).json({ success: false });
+  if (!mongoose.Types.ObjectId.isValid(categoryId)) {
+    return res.status(400).json({ message: "id no válido" });
+  }
+
+  if (!req.params || !categoryId) {
+    return res.status(400).json({ message: "Parámetros no válidos" });
+  }
+
+  try {
+    const categoryExists = await Category.findById(categoryId);
+
+    if (!categoryExists) {
+      return res
+        .status(404)
+        .json({ success: false, message: "No existe la categoria" });
     }
 
-    res.status(200).json({ success: true, data: category });
+    return res.status(200).json({ success: true, category: categoryExists });
   } catch (err) {
-    res.status(500).json({ success: false, error: err });
+    console.error(err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Error interno del servidor" });
   }
 };
