@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import validator from "validator";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import crypto from "crypto";
 
 // usar para impementar 2FA
 //import speakeasy from "speakeasy";
@@ -94,6 +95,9 @@ const userSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Address'
     }],
+    passwordChangedAt: Date,
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   {
     timestamps: true
@@ -117,6 +121,7 @@ userSchema.methods.generateAuthToken = async function () {
   const token = jwt.sign(
     { _id: user._id.toString() }, 
     JWT_SECRET,
+    { expiresIn: "1d" }
   );
 
   try {
@@ -146,7 +151,7 @@ userSchema.statics.findByCredentials = async (email, password) => {
   return user;
 };
 
-// Método para restablecer el password con expiración de 30 minutos
+// Método para restablecer el password con expiración de 15 minutos
 userSchema.methods.generatePasswordReset = function () {
   const resetToken = crypto.randomBytes(32).toString("hex");
 
@@ -155,7 +160,7 @@ userSchema.methods.generatePasswordReset = function () {
     .update(resetToken)
     .digest("hex");
 
-  this.passwordResetExpiration = Date.now() + 30 * 60 * 1000;
+  this.passwordResetExpires = Date.now() + 24 * 60 * 60 * 1000;
 
   return resetToken;
 };

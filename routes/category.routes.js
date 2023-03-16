@@ -7,7 +7,7 @@ import {
   getCategoryById,
   getAllCategories,
 } from "../controllers/category.controller.js";
-import { auth, isAdmin } from "../utils/auth.js";
+import { auth, isAdmin } from "../middlewares/auth.js";
 
 // Crear el router
 const router = Router();

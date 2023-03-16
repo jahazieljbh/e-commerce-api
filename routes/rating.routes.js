@@ -9,7 +9,7 @@ import {
   getRatingById,
   getAllRatings,
 } from "../controllers/rating.controller.js";
-import { auth } from "../utils/auth.js";
+import { auth } from "../middlewares/auth.js";
 
 // Crear el router
 const router = Router();

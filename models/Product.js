@@ -60,11 +60,6 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    state: {
-      type: String,
-      enum: ["activo", "inactivo"],
-      default: "activo",
-    },
     ratings: [
       {
         type: mongoose.Schema.Types.ObjectId,

@@ -1,20 +1,24 @@
 import { Router } from "express";
 
-import {auth, isAdmin} from "../utils/auth.js";
+import { auth, isAdmin } from "../middlewares/auth.js";
+
+import { createOrder, getOrderByUserId, getOrdersByUser, getAllOrders, updateOrderStatus, captureOrder, cancelOrder } from "../controllers/order.controller.js";
 
 // Crear el router
 const router = Router();
 
-// Ruta para agregar un pedido
-router.post("/order", auth, addOrder);
+router.post("/", auth, createOrder);
 
-// Ruta para obtener información de un pedido
-router.get("/order/:id", auth, getOrderById);
+router.get("/:id", auth, isAdmin, getOrderByUserId);
 
-// Ruta para obtener información de todos los pedidos
-router.get("/orders", auth, getOrders);
+router.get("/", auth, getOrdersByUser);
 
-// Ruta para actualizar el estado de un pedido
-router.patch("/order/:id", auth, updateOrderById);
+router.get("/all-orders", auth, isAdmin, getAllOrders);
+
+router.patch("/:id", auth, isAdmin, updateOrderStatus);
+
+router.post("/capture", auth, captureOrder);
+
+router.get("/cancel", auth, cancelOrder);
 
 export default router;

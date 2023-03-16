@@ -3,7 +3,7 @@ import { Router } from "express";
 import {
   createUser,
   deleteUserById,
-  updateUserById,
+  updateUser,
   getUserById,
   getAllUsers,
   uploadAvatar,
@@ -13,9 +13,12 @@ import {
   logoutAllUsers,
   blockUserById,
   unblockUserById,
+  updatePassword,
+  forgotPasswordToken,
+  resetPassword
 } from "../controllers/user.controller.js";
-import { auth, isAdmin } from "../utils/auth.js";
-import upload from "../utils/upload.js";
+import { auth, isAdmin } from "../middlewares/auth.js";
+import upload from "../middlewares/upload.js";
 
 // Crear el router
 const router = Router();
@@ -30,16 +33,25 @@ router.post("/login", loginUser);
 router.post("/logout", auth, logoutUser);
 
 // Ruta para cerrar sesión de todos los dispositivos del usuario.
-router.post("/logoutAll", auth, logoutAllUsers);
+router.post("/logout-all", auth, logoutAllUsers);
 
 // Ruta para obtener información de todos los usuarios.
-router.get("/", auth, isAdmin, getAllUsers);
+router.get("/all-users", auth, isAdmin, getAllUsers);
 
 // Ruta para obtener información de un usuario.
 router.get("/:id", auth, isAdmin, getUserById);
 
 // Ruta para actualizar información de un usuario.
-router.patch("/:id", auth, updateUserById);
+router.patch("/edit-user", auth, updateUser);
+
+// Ruta para actualizar password de un usuario.
+router.patch("/password", auth, updatePassword);
+
+// Ruta para generar un token de recuperación de contraseña.
+router.post("/forgot-password-token", forgotPasswordToken);
+
+// Ruta para restablecer la contraseña de un usuario.
+router.patch("/reset-password/:token", resetPassword);
 
 // Ruta para eliminar un usuario.
 router.delete("/:id", auth, isAdmin, deleteUserById);
@@ -51,9 +63,9 @@ router.post("/avatar", auth, upload.single("avatar"), uploadAvatar);
 router.get("/avatar/:id", auth, getAvatarById);
 
 // Ruta para para bloquear a un usuario.
-router.patch("/:id/block", auth, isAdmin, blockUserById);
+router.patch("/block/:id", auth, isAdmin, blockUserById);
 
 // Ruta para para desbloquear a un usuario.
-router.patch("/:id/unblock", auth, isAdmin, unblockUserById);
+router.patch("/unblock/:id", auth, isAdmin, unblockUserById);
 
 export default router;

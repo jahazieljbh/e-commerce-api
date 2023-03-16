@@ -53,6 +53,10 @@ export const createAddress = async (req, res) => {
         .json({ message: "Ya tienes una direccion registrada con ese nombre" });
     }
 
+    if (addresses.length > 0) {
+      await Address.updateMany({ user: user }, { isDefault: false });
+    }
+
     const addressData = {
       user: userExists._id,
       addressName,
@@ -62,6 +66,7 @@ export const createAddress = async (req, res) => {
       state,
       country,
       zipcode,
+      isDefault: true
     };
 
     const address = await Address.create(addressData);

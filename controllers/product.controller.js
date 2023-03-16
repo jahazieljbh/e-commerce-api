@@ -3,10 +3,11 @@ import slugify from "slugify";
 import Product from "../models/Product.js";
 import Category from "../models/Category.js";
 import Rating from "../models/Rating.js";
+import Cart from "../models/Cart.js";
 
 // Crear un producto
 export const createProduct = async (req, res) => {
-  const { name, slug, description, price, images, colors, tags, category, brand, stock } = req.body;
+  const { name, description, price, images, colors, tags, category, brand, stock } = req.body;
   
   if (!name) {
     return res
@@ -127,9 +128,9 @@ export const getAllProducts = async (req, res) => {
 
     // Obtener los productos filtrados, ordenados, limitados y con los campos especificados
     let products = await Product.find(filter)
-      .sort(sort ? sort : 'createdAt')
+      .sort(sort ? sort : '-createdAt')
       .limit(limit ? limit : 10)
-      .select(fields ? fields.split(',').join(' ') : '');
+      .select(fields ? fields.split(',').join(' ') : '-__v').populate('category').populate('ratings');
 
     // Aplicar la paginación al resultado anteriormente obtenido
     products = products.slice(startIndex, endIndex);
@@ -279,7 +280,7 @@ export const updateProductById = async (req, res) => {
   }
 };
 
-// Eliminar un producto por ID
+// Eliminar un producto por ID // falta remover del carrito
 export const deleteProductById = async (req, res) => {
   const productId = req.params.id;
 
@@ -336,7 +337,7 @@ export const getProductsByCategory = async (req, res) => {
   }
   
   try {
-    const products = await Product.find({ category });
+    const products = await Product.find({ category }).populate('category').populate('ratings');
 
     if (!products) {
       return res.status(404).json({ message: "No se encontraron productos" });
@@ -359,7 +360,7 @@ export const getProductosByTag = async (req, res) => {
   }
 
   try {
-    const products = await Product.find({ tags: tag });
+    const products = await Product.find({ tags: tag }).populate('category').populate('ratings');
 
     if (!products) {
       return res.status(404).json({ message: "No se encontraron productos" });
@@ -382,7 +383,7 @@ export const getProductosByColor = async (req, res) => {
   }
 
   try {
-    const products = await Product.find({ colors: color });
+    const products = await Product.find({ colors: color }).populate('category').populate('ratings');
 
     if (!products) {
       return res.status(404).json({ message: "No se encontraron productos" });
@@ -405,8 +406,7 @@ export const getProductosByBrand = async (req, res) => {
   }
 
   try {
-    const products = await Product.find({ brand });
-
+    const products = await Product.find({ brand }).populate('category').populate('ratings');
     if (!products) {
       return res.status(404).json({ message: "No se encontraron productos" });
     }
@@ -429,7 +429,7 @@ export const getProductosByPriceRange = async (req, res) => {
   }
 
   try {
-    const products = await Product.find({ price: { $gte: minPrice, $lte: maxPrice } });
+    const products = await Product.find({ price: { $gte: minPrice, $lte: maxPrice } }).populate('category').populate('ratings');
 
     if (!products) {
       return res.status(404).json({ message: "No se encontraron productos" });
@@ -452,7 +452,7 @@ export const getProductosByKeyword = async (req, res) => {
   }
 
   try {
-    const products = await Product.find({ $or: [{ name: { $regex: keyword, $options: "i" } }, { description: { $regex: keyword, $options: "i" } }] });
+    const products = await Product.find({ $or: [{ name: { $regex: keyword, $options: "i" } }, { slug: { $regex: keyword, $options: "i" } }, { description: { $regex: keyword, $options: "i" } }] }).populate('category').populate('ratings');
 
     if (!products) {
       return res.status(404).json({ message: "No se encontraron productos" });

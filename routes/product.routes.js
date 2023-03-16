@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { auth, isAdmin } from "../utils/auth.js";
+import { auth, isAdmin } from "../middlewares/auth.js";
 import {
   createProduct,
   getProductById,

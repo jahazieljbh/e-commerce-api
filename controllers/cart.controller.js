@@ -142,7 +142,7 @@ export const getCartById = async (req, res) => {
   }
 };
 
-export const getCarts = async (req, res) => {
+export const getAllCarts = async (req, res) => {
   try {
     const user = req.user._id;
     const carts = await Cart.find({ user: user }).populate("products.product");
@@ -235,7 +235,7 @@ export const addProductToCart = async (req, res) => {
   try {
     const user = req.user._id; // Obtenemos el id del usuario logeado
     const productId = req.params.id; // Obtenemos el id del producto
-    const { color } = req.body; // Obtenemos el color del producto
+    const { color } = req.body; // Especificamos el color del producto
 
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({ message: "ID no válido" });
@@ -286,6 +286,8 @@ export const addProductToCart = async (req, res) => {
       };
 
       cartExists = await Cart.create(cartData);
+      userExists.cart.push(cartExists);
+      userExists.save();
 
       return res.status(201).json({
         success: true,
@@ -348,6 +350,7 @@ export const removeProductFromCart = async (req, res) => {
   try {
     const user = req.user._id; // Obtenemos el id del usuario logeado
     const productId = req.params.id; // Obtenemos el id del producto
+    const { color } = req.body; // Especificamos el color del producto
 
     if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({ message: "ID no válido" });
@@ -357,53 +360,53 @@ export const removeProductFromCart = async (req, res) => {
       return res.status(400).json({ message: "Parámetros no válidos" });
     }
 
-    // Obtener el carrito del usuario logeado
-    const cart = await Cart.findOne({ user: user });
-
-    // Si el carrito no existe, devolver un error
-    if (!cart) {
-      return res.status(404).json({ message: "Carrito no encontrado" });
+    // Verificamos que el usuario exista en la base de datos
+    const userExists = await User.findById(user);
+    if (!userExists) {
+      return res.status(404).json({ message: "El usuario no existe" });
     }
 
-    // Obtener el producto a remover del carrito
-    const productToRemove = cart.products.find(
-      (product) => product.id == productId
-    );
-    console.log(productToRemove);
-
-    // Si el producto no existe en el carrito, devolver un error
-    if (!productToRemove) {
+    // Verificamos si el usuario tiene un carrito creado en la base de datos
+    let cartExists = await Cart.findOne({ user: user });
+    if (!cartExists) {
       return res
         .status(404)
-        .json({ message: "Producto no encontrado en el carrito" });
+        .json({ message: "El usuario no tiene un carrito creado" });
     }
 
-    // Remover el producto del carrito y actualizar los valores de total y cantidad de productos en el carrito
-    const updatedProducts = cart.products.remove({
-      id: productToRemove.id,
-      name: productToRemove.name,
-      description: productToRemove.description,
-      price: productToRemove.price,
-      quantity: productToRemove.quantity,
-    });
+    // Verificamos que el producto exista en el carrito
+    let productIndex = -1; // Variable para guardar el índice del producto en el carrito
 
-    cart.products.push(updatedProducts);
-
-    let total = 0;
-
-    for (let i = 0; i < updatedProducts.length; i++) {
-      total += updatedProducts[i].price * updatedProducts[i].quantity;
+    for (let i = 0; i < cartExists.products.length; i++) {
+      // Recorremos todos los elementos del arreglo products dentro del objeto cart para buscar el producto
+      if (
+        cartExists.products[i].product.equals(productId) &&
+        cartExists.products[i].color === color
+      ) {
+        // Si encontramos el producto, guardamos su índice y salimos del ciclo
+        productIndex = i;
+        break;
+      }
     }
 
-    cart.total = total;
+    if (productIndex === -1) {
+      return res
+        .status(404)
+        .json({ message: "El producto no existe en el carrito" });
+    }
 
-    await cart.save();
+    const productToRemove = cartExists.products[productIndex];
 
-    // Devolver respuesta exitosa con los datos actualizados del carrito al cliente
+    cartExists.products.splice(productIndex, 1); // Removemos el producto del arreglo products dentro del objeto cart
+
+    cartExists.total -= productToRemove.subtotal; // Actualizamos también el precio total del carrito restandole la cantidad total del producto eliminado
+
+    await cartExists.save(); // Guardamos los cambios realizados en la base de datos
+
     return res.status(200).json({
       success: true,
-      message: "Producto removido exitosamente",
-      cart: cart,
+      message: "Producto eliminado exitosamente",
+      cart: cartExists,
     });
   } catch (err) {
     console.error(err);
@@ -418,8 +421,7 @@ export const getProductFromCart = async (req, res) => {
   try {
     const productId = req.params.id;
     const user = req.user._id;
-    const cartName = req.body.name;
-    const cart = await Cart.findOne({ user: user, name: cartName });
+    const cart = await Cart.findOne({ user });
 
     if (!cart) {
       return res
@@ -449,8 +451,7 @@ export const getProductFromCart = async (req, res) => {
 export const getAllProductsFromCart = async (req, res) => {
   try {
     const user = req.user._id;
-    const cartName = req.body.name;
-    const cart = await Cart.findOne({ user: user, name: cartName });
+    const cart = await Cart.findOne({ user });
 
     if (!cart) {
       return res.status(404).json({ message: "Carrito no encontrado" });

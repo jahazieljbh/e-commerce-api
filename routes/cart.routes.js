@@ -5,7 +5,7 @@ import {
   deleteCartById,
   updateCartById,
   getCartById,
-  getCarts,
+  getAllCarts,
   addProductToCart,
   removeProductFromCart,
   getProductFromCart,
@@ -14,7 +14,7 @@ import {
   selectProduct,
 } from "../controllers/cart.controller.js";
 
-import { auth } from "../utils/auth.js";
+import { auth } from "../middlewares/auth.js";
 
 const router = Router();
 
@@ -27,7 +27,7 @@ router.patch("/:id", auth, updateCartById);
 
 router.get("/:id", auth, getCartById);
 
-router.get("/", auth, getCarts);
+router.get("/", auth, getAllCarts);
 
 router.post("/product/:id", auth, addProductToCart);
 
@@ -35,7 +35,7 @@ router.delete("/product/:id", auth, removeProductFromCart);
 
 router.get("/product/:id", auth, getProductFromCart);
 
-router.get("/product", auth, getAllProductsFromCart);
+router.get("/products", auth, getAllProductsFromCart);
 
 router.patch("/product/quantity/:id", auth, updateQuantity);
 
