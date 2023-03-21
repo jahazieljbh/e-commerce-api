@@ -225,12 +225,13 @@ export const getAllOrders = async (req, res) => {
 
 export const updateOrderStatus = async (req, res) => {
   try {
-    const status = req.body.status;
     const user = req.params.id;
-    const order = await Order.findOne({ user });
+    const token = req.query.token
+    const status = req.body.status;
+    const order = await Order.findOne({ user: user, paymentId: token });
     const updateOrder = await order.updateOne({ status });
 
-    return res.status(200).json({ success: true, order: updateOrder });
+    return res.status(200).json({ success: true, message: "Dirección actualizada exitosamente", order: updateOrder });
   } catch (err) {
     console.error(err);
     return res

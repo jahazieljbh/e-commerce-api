@@ -23,7 +23,75 @@ import upload from "../middlewares/upload.js";
 // Crear el router
 const router = Router();
 
-// Ruta para crear un nuevo usuario.
+/**
+ * @openapi
+ * components:
+ *   securitySchemes:
+ *     bearerAuth:
+ *       type: bearer
+ *       bearerFormat: JWT
+ *       in: header
+ *       name: Authorization
+ *       description: Ingrese el token JWT en el cuadro a continuación
+ *   schemas:
+ *     User:
+ *       type: object
+ *       properties:
+ *         firstname:
+ *           type: string
+ *           description: El nombre del usuario.
+ *           minLength: 1
+ *           example: John
+ *         lastname:
+ *           type: string
+ *           description: El apellido del usuario.
+ *           minLength: 1
+ *           example: Doe
+ *         addressLine2:
+ *           type: string
+ *           example: "Opcional"
+ *         city: 
+ *           type: string
+ *           example: "Miami"
+ *         state:
+ *           type: string
+ *           example: "Florida"
+ *         country:
+ *           type: string
+ *           example: "Estados Unidos"
+ *         zipcode:
+ *           type: string
+ *           example: "33126"
+ *         isDefault:
+ *           type: 'Boolean'
+ *           default: false
+ *       required: ['addressName','addressLine1','city','state','country','zipcode']
+ */
+
+/**
+ * @openapi
+ * paths:
+ *   /api/v1/user:
+ *     post:
+ *       security:
+ *         - bearerAuth: []
+ */
+
+/**
+ * @openapi
+ * /api/v1/user:
+ *   post:
+ *     tags:
+ *       - User
+ *     summary: Crear direccion del usuaio authenticado.
+ *     responses:
+ *       201:
+ *         description: CREATE
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ */
 router.post("/signup", createUser);
 
 // Ruta para autenticar a un usuario.

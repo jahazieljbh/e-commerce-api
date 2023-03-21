@@ -363,7 +363,6 @@ export const forgotPasswordToken = async (req, res) => {
     // Generar un token de restablecimiento de contraseña
     const resetToken = user.generatePasswordReset();
 
-    console.log(resetToken);
     await user.save();
 
     // Enviar el token por correo electrónico al usuario

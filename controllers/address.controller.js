@@ -111,7 +111,7 @@ export const setDefaultAddress = async (req, res) => {
   }
 };
 
-// Controlador para eliminar una dirección // falta reparar
+// Controlador para eliminar una dirección
 export const deleteAddressById = async (req, res) => {
   const addressId = req.params.id;
 

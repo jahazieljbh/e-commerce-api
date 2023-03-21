@@ -17,7 +17,7 @@ const router = Router();
 router.post("/", auth, createAddress);
 
 // Ruta para establecer dirección por defecto
-router.post("/", auth, setDefaultAddress);
+router.post("/default/:id", auth, setDefaultAddress);
 
 // Ruta para obtener información de una dirección
 router.get("/:id", auth, getAddressById);
