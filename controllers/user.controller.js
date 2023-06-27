@@ -370,11 +370,9 @@ export const forgotPasswordToken = async (req, res) => {
       "host"
     )}/api/v1/users/resetPassword/${resetToken}`;
 
-    const message = `¡Hola, ${user.firstname}! 
-
-    ¿Olvidaste tu contraseña? Sigue el siguiente enlace para restablecerla. Este enlace es válido por 24 horas a partir de ahora: <a href="${resetURL}">Haga clic aquí</a>. 
-    
-    Si no solicitaste este cambio, por favor ignora este correo electrónico.`;
+    const message = `<div style="border-style:solid;border-width:thin;border-color:#dadce0;border-radius:8px;padding:40px 20px">
+    ¡Hola, ${user.firstname}!\n\n
+    ¿Olvidaste tu contraseña? Sigue el siguiente enlace para restablecerla.\nEste enlace es válido por 24 horas a partir de ahora: <a href="${resetURL}" style="font-family:'Google Sans',Roboto,RobotoDraft,Helvetica,Arial,sans-serif;line-height:16px;color:#ffffff;font-weight:400;text-decoration:none;font-size:14px;display:inline-block;padding:10px 24px;background-color:#4184f3;border-radius:5px;min-width:90px">Haga clic aquí</a>.\n\nSi no solicitaste este cambio, por favor ignora este correo electrónico.</div>`;
 
     try {
       const emailData = {
