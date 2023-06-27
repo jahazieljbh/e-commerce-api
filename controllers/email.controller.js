@@ -1,35 +1,22 @@
 import nodemailer from "nodemailer";
-import { google } from "googleapis";
 
-const OAuth2 = google.auth.OAuth2;
 import {
   EMAIL_USER,
-  CLIENT_ID,
-  CLIENT_SECRET,
-  REFRESH_TOKEN,
+  EMAIL_PASSWORD
 } from "../config/config.js";
 
-const oauth2Client = new OAuth2(
-  CLIENT_ID,
-  CLIENT_SECRET,
-  "https://developers.google.com/oauthplayground"
-);
-oauth2Client.setCredentials({
-  refresh_token: REFRESH_TOKEN,
-  tls: {
-    rejectUnauthorized: false
-  }
-});
 
 const transporter = nodemailer.createTransport({
   service: "gmail",
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: true,
   auth: {
-    type: "OAuth2",
     user: EMAIL_USER,
-    clientId: CLIENT_ID,
-    clientSecret: CLIENT_SECRET,
-    refreshToken: REFRESH_TOKEN,
-    accessToken: oauth2Client.getAccessToken()
+    pass: EMAIL_PASSWORD,
+  },
+  tls: {
+    rejectUnauthorized: false
   }
 });
 
