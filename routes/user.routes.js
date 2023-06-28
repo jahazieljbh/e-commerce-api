@@ -84,7 +84,7 @@ const router = Router();
 
 /**
  * @swagger
- * /api/v1/user/signup:
+ * /user/signup:
  *   post:
  *     summary: Create a new user
  *     tags: [Users]
@@ -124,7 +124,7 @@ router.post("/signup", createUser);
 
 /**
  * @swagger
- * /api/v1/user/login:
+ * /user/login:
  *   post:
  *     summary: Authenticate a user
  *     tags: [Users]
@@ -178,7 +178,7 @@ router.post("/login", loginUser);
 
 /**
  * @swagger
- * /api/v1/user/logout:
+ * /user/logout:
  *   post:
  *     summary: Logout a user
  *     tags: [Users]
@@ -210,7 +210,7 @@ router.post("/logout", auth, logoutUser);
 
 /**
  * @swagger
- * /api/v1/user/logout-all:
+ * /user/logout-all:
  *   post:
  *     summary: Logout user from all devices
  *     tags: [Users]
@@ -238,7 +238,7 @@ router.post("/logout-all", auth, logoutAllUsers);
 
 /**
  * @swagger
- * /api/v1/user/all-users:
+ * /user/all-users:
  *   get:
  *     summary: Get all users
  *     tags: [Users]
@@ -297,7 +297,7 @@ router.get("/all-users", auth, isAdmin, getAllUsers);
 
 /**
  * @swagger
- * /api/v1/user/{id}:
+ * /user/{id}:
  *   get:
  *     summary: Get user by ID
  *     tags: [Users]
@@ -368,7 +368,7 @@ router.get("/:id", auth, isAdmin, getUserById);
 
 /**
  * @swagger
- * /api/v1/user/edit-user:
+ * /user/edit-user:
  *   patch:
  *     summary: Update user information
  *     tags: [Users]
@@ -471,7 +471,7 @@ router.patch("/edit-user", auth, updateUser);
 
 /**
  * @swagger
- * /api/v1/user/password:
+ * /user/password:
  *   patch:
  *     summary: Update user password
  *     tags: [Users]
@@ -540,7 +540,7 @@ router.patch("/password", auth, updatePassword);
 
 /**
  * @swagger
- * /api/v1/user/forgot-password-token:
+ * /user/forgot-password-token:
  *   post:
  *     summary: Generate password recovery token
  *     tags: [Users]
@@ -603,7 +603,7 @@ router.post("/forgot-password-token", forgotPasswordToken);
 
 /**
  * @swagger
- * /api/v1/user/reset-password/{token}:
+ * /user/reset-password/{token}:
  *   patch:
  *     summary: Reset user password
  *     tags: [Users]
@@ -673,7 +673,7 @@ router.patch("/reset-password/:token", resetPassword);
 
 /**
  * @swagger
- * /api/v1/user/{id}:
+ * /user/{id}:
  *   delete:
  *     summary: Delete user by ID
  *     tags: [Users]
@@ -745,7 +745,7 @@ router.delete("/:id", auth, isAdmin, deleteUserById);
 
 /**
  * @swagger
- * /api/v1/user/avatar:
+ * /user/avatar:
  *   post:
  *     summary: Upload user avatar
  *     tags: [Users]
@@ -808,7 +808,7 @@ router.post("/avatar", auth, upload.single("avatar"), uploadAvatar);
 
 /**
  * @swagger
- * /api/v1/user/avatar/{id}:
+ * /user/avatar/{id}:
  *   get:
  *     summary: Get user avatar by ID
  *     tags: [Users]
@@ -857,7 +857,7 @@ router.get("/avatar/:id", auth, getAvatarById);
 
 /**
  * @swagger
- * /api/v1/user/block/{id}:
+ * /user/block/{id}:
  *   patch:
  *     summary: Block user by ID
  *     tags: [Users]
@@ -923,7 +923,7 @@ router.patch("/block/:id", auth, isAdmin, blockUserById);
 
 /**
  * @swagger
- * /api/v1/user/unblock/{id}:
+ * /user/unblock/{id}:
  *   patch:
  *     summary: Unblock user by ID
  *     tags: [Users]
