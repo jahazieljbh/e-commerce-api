@@ -30,7 +30,7 @@ const swaggerOptions = {
     },
     servers: [
       {
-        url: 'http://localhost:3000', // Replace with your server URL
+        url: 'https://e-commerce-api-agr5.onrender.com/api/v1', // Replace with your server URL
       },
     ],
   },
