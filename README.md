@@ -1,3 +1,73 @@
+- [API de eCommerce](#api-de-ecommerce)
+  - [Como obtener el proyecto](#como-obtener-el-proyecto)
+  - [Construido con las tecnología:](#construido-con-las-tecnología)
+  - [Autenticación](#autenticación)
+  - [Usuarios](#usuarios)
+    - [Crear usuario](#crear-usuario)
+    - [Crear usuario admin](#crear-usuario-admin)
+    - [Login de usuario](#login-de-usuario)
+    - [Logout de usuario](#logout-de-usuario)
+    - [Logout de usuario en todos los dispositivos](#logout-de-usuario-en-todos-los-dispositivos)
+    - [Obtener todos los usuario](#obtener-todos-los-usuario)
+    - [Obtener usuario por ID](#obtener-usuario-por-id)
+    - [Actualizar datos de usuario](#actualizar-datos-de-usuario)
+    - [Actualizar password de cuenta de usuario](#actualizar-password-de-cuenta-de-usuario)
+    - [Generar un token de recuperación de contraseña](#generar-un-token-de-recuperación-de-contraseña)
+    - [Restablecer la contraseña de un usuario usando el token de recuperacion](#restablecer-la-contraseña-de-un-usuario-usando-el-token-de-recuperacion)
+    - [Eliminar usuario](#eliminar-usuario)
+    - [Subir avatar de usuario](#subir-avatar-de-usuario)
+    - [Bloquear a un usuario](#bloquear-a-un-usuario)
+    - [Desbloquear a un usuario](#desbloquear-a-un-usuario)
+  - [Direcciónes](#direcciónes)
+    - [Agregar dirección a un usuario](#agregar-dirección-a-un-usuario)
+    - [Establecer dirección por defecto a usuario por ID](#establecer-dirección-por-defecto-a-usuario-por-id)
+    - [Obtener todas las direccións](#obtener-todas-las-direccións)
+    - [Obtener dirección por ID](#obtener-dirección-por-id)
+    - [Actualizar dirección de usuario por ID](#actualizar-dirección-de-usuario-por-id)
+    - [Eliminar dirección de usuario por ID](#eliminar-dirección-de-usuario-por-id)
+  - [Categorias](#categorias)
+    - [Crear categoria](#crear-categoria)
+    - [Obtener todas las categoria](#obtener-todas-las-categoria)
+    - [Obtener categoria por ID](#obtener-categoria-por-id)
+    - [Acrualizar categoria por ID](#acrualizar-categoria-por-id)
+    - [Eliminar categoria por ID](#eliminar-categoria-por-id)
+  - [Productos](#productos)
+    - [Crear producto](#crear-producto)
+    - [Actualizar producto por ID](#actualizar-producto-por-id)
+    - [Eliminar producto por ID](#eliminar-producto-por-id)
+    - [Obtener todos los productos](#obtener-todos-los-productos)
+    - [Obtener producto por ID](#obtener-producto-por-id)
+    - [Obtener todos los productos por ID de Categoria](#obtener-todos-los-productos-por-id-de-categoria)
+    - [Obtener todos los productos por tag 🏷️](#obtener-todos-los-productos-por-tag-️)
+    - [Obtener todos los productos por color 🎨](#obtener-todos-los-productos-por-color-)
+    - [Obtener todos los productos por brand](#obtener-todos-los-productos-por-brand)
+    - [Obtener todos los productos por rango de precios](#obtener-todos-los-productos-por-rango-de-precios)
+    - [Obtener todos los productos por palabra clave](#obtener-todos-los-productos-por-palabra-clave)
+  - [Calificacion](#calificacion)
+    - [Calificar un producto](#calificar-un-producto)
+    - [Eliminar calificacion de producto por ID](#eliminar-calificacion-de-producto-por-id)
+    - [Actualizar calificar del producto](#actualizar-calificar-del-producto)
+    - [Obtener calificacion por ID](#obtener-calificacion-por-id)
+    - [Obtener calificaciones por ID de producto](#obtener-calificaciones-por-id-de-producto)
+    - [Obtener calificaciones por ID de usuario](#obtener-calificaciones-por-id-de-usuario)
+    - [Obtener todas calificaciones](#obtener-todas-calificaciones)
+  - [Carrito de compras](#carrito-de-compras)
+    - [Agregar productos al carrito por ID de producto y requiere color de producto](#agregar-productos-al-carrito-por-id-de-producto-y-requiere-color-de-producto)
+    - [Quitar productos del carrito por ID de producto y requiere color de producto](#quitar-productos-del-carrito-por-id-de-producto-y-requiere-color-de-producto)
+    - [Crear carrito](#crear-carrito)
+    - [Actualizar carrito por ID](#actualizar-carrito-por-id)
+    - [Eliminar carrito por ID](#eliminar-carrito-por-id)
+    - [Obtener carrito por ID](#obtener-carrito-por-id)
+    - [Obtener carritos](#obtener-carritos)
+    - [Obtener productos del carritos](#obtener-productos-del-carritos)
+  - [Pedidos](#pedidos)
+    - [Crear pedido](#crear-pedido)
+    - [Capturar pedido](#capturar-pedido)
+    - [Cancelar pedido](#cancelar-pedido)
+    - [Actualizar el estado del pedido](#actualizar-el-estado-del-pedido)
+    - [Obtener pedidos por usuario](#obtener-pedidos-por-usuario)
+    - [Obtener todos los pedidos](#obtener-todos-los-pedidos)
+
 # API de eCommerce
 Este proyecto consiste en una API para una tienda electrónica. Permite crear usuarios, autenticarlos y actualizar sus datos. También cuenta con endpoints para agregar, editar y eliminar direcciónes, categorias, productos, manejar el carrito de compras, los pedidos y realizar pagos atravez de Paypal.
 
@@ -23,16 +93,17 @@ git clone https://github.com/jahazieljbh/eCommerce-API.git
 </p>
 
 ## Autenticación
-La autenticación se maneja a través de tokens JWT. Para obtener un token, el usuario debe hacer una petición POST al endpoint api/auth/login con su correo electrónico y contraseña. Si las credenciales son correctas, se generará un token que deberá ser incluido en el header de cada petición posterior con el formato Authorization: Bearer <token>.
+La autenticación se maneja a través de tokens JWT. Para obtener un token, el usuario debe hacer una petición POST al endpoint api/auth/login con su correo electrónico y contraseña. Si las credenciales son correctas, se generará un token que deberá ser incluido en el header de cada petición posterior con el formato Authorization: Bearer <token value>.
 
 ## Usuarios
+
 
 ### Crear usuario
 
 **URL:** `POST /api/v1/user/signup`
 <br/>
 <br/>
-**Payload:**
+**Example Value:**
 ```json
 {
     "firstname": "Jahaziel",
@@ -48,7 +119,7 @@ La autenticación se maneja a través de tokens JWT. Para obtener un token, el u
 **URL:** `POST /api/v1/user/signup`
 <br/>
 <br/>
-**Payload:**
+**Example Value:**
 ```json
 {
     "firstname": "Jahaziel",
@@ -65,11 +136,11 @@ La autenticación se maneja a través de tokens JWT. Para obtener un token, el u
 **URL:** `POST /api/v1/user/login`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "email": "jahaziel.example@gmail.com",
@@ -82,12 +153,12 @@ Content-Type: application/json
 **URL:** `POST /api/v1/user/logout`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Logout de usuario en todos los dispositivos
@@ -95,12 +166,12 @@ Authorization: Bearer <token>
 **URL:** `POST /api/v1/user/logout-all`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Obtener todos los usuario
@@ -108,12 +179,12 @@ Authorization: Bearer <token>
 **URL:** `GET /api/v1/user/all-users`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Obtener usuario por ID
@@ -121,12 +192,12 @@ Authorization: Bearer <token>
 **URL:** `GET /api/v1/user/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Actualizar datos de usuario
@@ -134,14 +205,14 @@ Authorization: Bearer <token>
 **URL:** `PATCH /api/v1/user/edit-user`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "firstname": "Jahaziel",
@@ -157,14 +228,14 @@ Authorization: Bearer <token>
 **URL:** `PATCH /api/v1/user/password`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "newPassword": "MyPassword1234",
@@ -177,11 +248,11 @@ Authorization: Bearer <token>
 **URL:** `POST /api/v1/user/forgot-password-token`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "email": "jahaziel.example@gmail.com"
@@ -193,14 +264,14 @@ Content-Type: application/json
 **URL:** `POST /api/v1/user/reset-password/<token>`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
-    "password": "Example123"
+    "password": "Example Value123"
 }
 ```
 
@@ -209,12 +280,12 @@ Content-Type: application/json
 **URL:** `DELETE /api/v1/user/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Subir avatar de usuario
@@ -222,12 +293,12 @@ Authorization: Bearer <token>
 **URL:** `POST /api/v1/user/me/avatar`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Bloquear a un usuario
@@ -235,12 +306,12 @@ Authorization: Bearer <token>
 **URL:** `PATCH /api/v1/user/block/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Desbloquear a un usuario
@@ -248,12 +319,12 @@ Authorization: Bearer <token>
 **URL:** `PATCH /api/v1/user/unblock/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ## Direcciónes
@@ -263,14 +334,14 @@ Authorization: Bearer <token>
 **URL:** `POST /api/v1/address/`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "addressName": "Casa",
@@ -288,12 +359,12 @@ Authorization: Bearer <token>
 **URL:** `POST /api/v1/address/default/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Obtener todas las direccións
@@ -301,12 +372,12 @@ Authorization: Bearer <token>
 **URL:** `GET /api/v1/address/`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Obtener dirección por ID
@@ -314,12 +385,12 @@ Authorization: Bearer <token>
 **URL:** `GET /api/v1/address/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Actualizar dirección de usuario por ID
@@ -327,14 +398,14 @@ Authorization: Bearer <token>
 **URL:** `PATCH /api/v1/address/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "addressName": "Casa #2",
@@ -352,12 +423,12 @@ Authorization: Bearer <token>
 **URL:** `DELETE /api/v1/address/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ## Categorias
@@ -367,14 +438,14 @@ Authorization: Bearer <token>
 **URL:** `POST /api/v1/category/`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "name": "Ropa"
@@ -386,7 +457,7 @@ Authorization: Bearer <token>
 **URL:** `GET /api/v1/category/`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -396,7 +467,7 @@ Content-Type: application/json
 **URL:** `GET /api/v1/category/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -406,14 +477,14 @@ Content-Type: application/json
 **URL:** `PATCH /api/v1/category/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "name": "Ropa"
@@ -425,12 +496,12 @@ Authorization: Bearer <token>
 **URL:** `DELETE /api/v1/category/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ## Productos 
@@ -440,14 +511,14 @@ Authorization: Bearer <token>
 **URL:** `POST /api/v1/product/`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "name": "Zapatillas Adidas",
@@ -458,7 +529,7 @@ Authorization: Bearer <token>
     "tags": ["Deportivo", "Correr"],
     "category": "Calzado",
     "brand": "Adidas",
-    "stock": 8,
+    "stock": 8
 }
 ```
 
@@ -467,14 +538,14 @@ Authorization: Bearer <token>
 **URL:** `PATCH /api/v1/product/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "name": "Zapatillas Adidas #2",
@@ -493,12 +564,12 @@ Authorization: Bearer <token>
 **URL:** `DELETE /api/v1/product/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Obtener todos los productos
@@ -506,7 +577,7 @@ Authorization: Bearer <token>
 **URL:** `GET /api/v1/product/`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -525,7 +596,7 @@ pages       1
 **URL:** `GET /api/v1/product/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -536,7 +607,7 @@ Content-Type: application/json
 **URL:** `GET /api/v1/product/category/:category`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -551,7 +622,7 @@ category    640b8c9db61a110f71507e65
 **URL:** `GET /api/v1/product/tag/:tag`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -566,7 +637,7 @@ tag         Deportivo
 **URL:** `GET /api/v1/product/color/:color`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -581,7 +652,7 @@ color       Plata
 **URL:** `GET /api/v1/product/brand/:brand`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -596,7 +667,7 @@ brand       Nike
 **URL:** `GET /api/v1/product/price-range/:minPrice-:maxPrice`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -611,7 +682,7 @@ minPrice-maxPrice       600-5000
 **URL:** `GET /api/v1/product/keyword/:keyword`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -628,14 +699,14 @@ keyword      laptop
 **URL:** `POST /api/v1/rating/`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "product": "6407bc830682dc34c647298f",
@@ -649,12 +720,12 @@ Authorization: Bearer <token>
 **URL:** `DELETE /api/v1/rating/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Actualizar calificar del producto
@@ -662,14 +733,14 @@ Authorization: Bearer <token>
 **URL:** `PATCH /api/v1/rating/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "product": "6407bc830682dc34c647298f",
@@ -683,7 +754,7 @@ Authorization: Bearer <token>
 **URL:** `GET /api/v1/rating/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -693,7 +764,7 @@ Content-Type: application/json
 **URL:** `GET /api/v1/rating/product/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -703,7 +774,7 @@ Content-Type: application/json
 **URL:** `GET /api/v1/rating/user/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -713,7 +784,7 @@ Content-Type: application/json
 **URL:** `GET /api/v1/rating/`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
@@ -725,14 +796,14 @@ Content-Type: application/json
 **URL:** `POST /api/v1/cart/product/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "color": "Negro"
@@ -744,14 +815,14 @@ Authorization: Bearer <token>
 **URL:** `DELETE /api/v1/cart/product/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "color": "Negro"
@@ -764,14 +835,14 @@ Nota: opcional se crea el carrito automaticamente al agregar producto al carrito
 **URL:** `POST /api/v1/cart/`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "name": "Carrito de Jahaziel"
@@ -783,14 +854,14 @@ Authorization: Bearer <token>
 **URL:** `PATCH /api/v1/cart/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
-**Payload:**
+**Example Value:**
 ```json
 {
     "name": "Carrito para ropa"
@@ -802,12 +873,12 @@ Authorization: Bearer <token>
 **URL:** `DELETE /api/v1/cart/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Obtener carrito por ID
@@ -815,12 +886,12 @@ Authorization: Bearer <token>
 **URL:** `GET /api/v1/cart/:id`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Obtener carritos
@@ -828,12 +899,12 @@ Authorization: Bearer <token>
 **URL:** `GET /api/v1/cart/`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Obtener productos del carritos
@@ -841,12 +912,12 @@ Authorization: Bearer <token>
 **URL:** `GET /api/v1/cart/products`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ## Pedidos
@@ -857,12 +928,12 @@ Nota: Apartir del carrito de compras
 **URL:** `POST /api/v1/order`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Capturar pedido
@@ -871,12 +942,12 @@ Nota: Obtener url apartir del la creacion del pedido y despes de haber accedido 
 **URL:** `POST /api/v1/order/capture?token=5W616668C45401223&PayerID=VVEU6SCZVU2V8`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Cancelar pedido
@@ -885,12 +956,12 @@ Nota: Obtener url apartir del la creacion del pedido y despes de haber accedido 
 **URL:** `POST /api/v1/order/cancel?token=5W616668C45401223`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Actualizar el estado del pedido
@@ -899,12 +970,12 @@ Nota: Obtener token a partir de paymentId propiedad de modelo o esquema order
 **URL:** `PATCH /api/v1/order/640b8c5bb61a110f71507e5d?token=5W616668C45401223`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 **Query Parameters:**
 ```
@@ -917,12 +988,12 @@ token       5W616668C45401223
 **URL:** `GET /api/v1/order/`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```
 
 ### Obtener todos los pedidos
@@ -930,10 +1001,10 @@ Authorization: Bearer <token>
 **URL:** `GET /api/v1/order/all-orders`
 <br/>
 <br/>
-**Headers:**
+**Resquest headers:**
 ```
 Content-Type: application/json
 ```
 ```
-Authorization: Bearer <token>
+Authorization: Bearer <token value>
 ```

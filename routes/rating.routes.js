@@ -57,7 +57,7 @@ const router = Router();
 /**
  * @swagger
  * tags:
- *   name: Ratings
+ *   name: Rating
  *   description: The ratings managing API
  */
 
