@@ -46,7 +46,7 @@ const router = Router();
   /**
   * @swagger
   * tags:
-  *   name: Categories
+  *   name: Category
   *   description: Category Management Endpoint
   */
 
