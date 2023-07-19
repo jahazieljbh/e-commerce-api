@@ -139,7 +139,7 @@ router.post("/signup", createUser);
  *               email:
  *                 type: string
  *                 description: The email address of the user.
- *                 example: johndoe@example.com
+ *                 example: jahaziel.example@gmail.com
  *               password:
  *                 type: string
  *                 description: The password of the user.
@@ -385,11 +385,11 @@ router.get("/:id", auth, isAdmin, getUserById);
  *               firstname:
  *                 type: string
  *                 description: The first name of the user.
- *                 example: Jahaziel
+ *                 example: jahaziel
  *               lastname:
  *                 type: string
  *                 description: The last name of the user.
- *                 example: Basilio
+ *                 example: basilio
  *               mobile:
  *                 type: string
  *                 description: The mobile number of the user.
